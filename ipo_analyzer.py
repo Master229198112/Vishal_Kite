@@ -87,9 +87,9 @@ def calculate_scorecard(gmp_data: Dict[str, Any], sub_data: Dict[str, Any], fund
 from config import get_config
 
 
-def generate_gemini_summary(company_name: str, payload: Dict[str, Any]) -> tuple[Optional[str], Optional[str]]:
+def generate_gemini_summary(company_name: str, payload: Dict[str, Any], language: str = "English") -> tuple[Optional[str], Optional[str]]:
     """
-    Invoke Google Gemini to write a structured research memo.
+    Invoke Google Gemini to write a structured research memo in the requested language.
     Returns (narrative, model_name) or (None, None).
     """
     api_key = get_config("GEMINI_API_KEY")
@@ -100,9 +100,18 @@ def generate_gemini_summary(company_name: str, payload: Dict[str, Any]) -> tuple
     try:
         client = genai.Client(api_key=api_key)
 
+        lang_instruction = ""
+        if language and language.strip().lower() != "english":
+            lang_instruction = (
+                f"\nCRITICAL LANGUAGE REQUIREMENT: Write the entire analysis, section headings, "
+                f"bullet points, and final verdict in {language}. "
+                f"Ensure the language is fluent, professional, and natural for native {language} speakers, "
+                f"while preserving financial numbers, symbols (₹), and percentages.\n"
+            )
+
         prompt = f"""You are a senior institutional equity research analyst specializing in Indian IPOs.
 Analyze the following compiled data for '{company_name}' and provide a clear, high-conviction research report.
-
+{lang_instruction}
 DATA CONTEXT:
 - Company: {company_name}
 - Category: {payload.get('fundamentals', {}).get('category', 'Mainboard')}
@@ -156,6 +165,7 @@ def generate_full_ipo_analysis(
     sub_data: Dict[str, Any],
     fund_data: Dict[str, Any],
     media_data: Dict[str, Any],
+    language: str = "English",
 ) -> Dict[str, Any]:
     """Synthesize all research vectors into an executive analysis package."""
     scorecard = calculate_scorecard(gmp_data, sub_data, fund_data)
@@ -167,9 +177,10 @@ def generate_full_ipo_analysis(
         "subscription": sub_data,
         "fundamentals": fund_data,
         "media": media_data,
+        "language": language,
     }
 
-    ai_narrative, used_model = generate_gemini_summary(company_name, payload)
+    ai_narrative, used_model = generate_gemini_summary(company_name, payload, language=language)
 
     return {
         "status": "success",

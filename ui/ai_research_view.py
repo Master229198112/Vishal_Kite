@@ -19,11 +19,30 @@ def render_ai_research_view():
     ipos_res = ipo_mcp.get_upcoming_ipos()
     ipo_names = [i["company_name"] for i in ipos_res.get("ipos", [])] if ipos_res.get("status") == "success" else []
 
-    col_select, col_btn = st.columns([3, 1])
+    col_select, col_lang, col_btn = st.columns([2.5, 1.5, 1])
     with col_select:
         selected_ipo = st.selectbox(
             "Select an IPO to Analyze:",
             options=ipo_names or ["Acme India Industries", "TNA Solutions", "Tata Technologies"],
+        )
+    with col_lang:
+        languages = [
+            "English",
+            "Hindi (हिंदी)",
+            "Marathi (मराठी)",
+            "Gujarati (ગુજરાતી)",
+            "Telugu (తెలుగు)",
+            "Tamil (தமிழ்)",
+            "Bengali (বাংলা)",
+            "Kannada (ಕನ್ನಡ)",
+            "Malayalam (മലയാളം)",
+            "Punjabi (ਪੰਜਾਬੀ)",
+        ]
+        selected_lang = st.selectbox(
+            "Analysis Language:",
+            options=languages,
+            index=0,
+            help="Choose the language for the AI investment research report",
         )
     with col_btn:
         st.write("")
@@ -32,10 +51,12 @@ def render_ai_research_view():
 
     if analyze_btn or "last_analyzed_ipo" in st.session_state:
         target = selected_ipo if analyze_btn else st.session_state.get("last_analyzed_ipo")
+        active_lang = selected_lang if analyze_btn else st.session_state.get("last_analyzed_lang", "English")
         st.session_state["last_analyzed_ipo"] = target
+        st.session_state["last_analyzed_lang"] = active_lang
 
-        with st.spinner(f"Analyzing {target} via Google Gemini & YouTube intelligence..."):
-            res = ipo_mcp.get_ipo_analysis_summary(target)
+        with st.spinner(f"Analyzing {target} in {active_lang} via Google Gemini & YouTube intelligence..."):
+            res = ipo_mcp.get_ipo_analysis_summary(target, language=active_lang)
 
         if res.get("status") == "error":
             st.error(f"Analysis failed: {res.get('message')}")

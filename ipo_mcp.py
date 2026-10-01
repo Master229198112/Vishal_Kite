@@ -127,7 +127,7 @@ def get_ipo_media(symbol_or_name: str, max_results: Optional[int] = 5) -> Dict[s
 
 
 @mcp.tool()
-def get_ipo_analysis_summary(symbol_or_name: str) -> Dict[str, Any]:
+def get_ipo_analysis_summary(symbol_or_name: str, language: Optional[str] = "English") -> Dict[str, Any]:
     """
     Generate a comprehensive executive research report and investment verdict for an IPO.
     Synthesizes GMP, bidding subscription, fundamentals, and analyst videos.
@@ -135,6 +135,7 @@ def get_ipo_analysis_summary(symbol_or_name: str) -> Dict[str, Any]:
 
     Args:
         symbol_or_name: Company name or trading symbol.
+        language: Desired output language for the research memo (e.g. English, Hindi, Marathi, etc.).
 
     Returns:
         Dict containing quantitative scorecard (1-10), listing gain potential, risk level,
@@ -149,7 +150,14 @@ def get_ipo_analysis_summary(symbol_or_name: str) -> Dict[str, Any]:
         fund_data = fetch_ipo_fundamentals(symbol_or_name)
         media_data = fetch_ipo_videos(symbol_or_name, max_results=3)
 
-        return generate_full_ipo_analysis(symbol_or_name, gmp_data, sub_data, fund_data, media_data)
+        return generate_full_ipo_analysis(
+            symbol_or_name,
+            gmp_data,
+            sub_data,
+            fund_data,
+            media_data,
+            language=language or "English",
+        )
     except Exception as exc:
         return {"status": "error", "error_type": type(exc).__name__, "message": str(exc)}
 

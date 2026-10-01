@@ -12,8 +12,11 @@ import streamlit as st
 import auth_manager
 from config import get_config
 from ui.ai_research_view import render_ai_research_view
+from ui.alerts_view import render_alerts_view
+from ui.allotment_view import render_allotment_view
 from ui.auth_view import auto_handle_oauth_redirect, check_auth_status, render_auth_view
 from ui.ipo_view import render_ipo_view
+from ui.listing_view import render_listing_view
 from ui.portfolio_view import render_portfolio_view
 from ui.profile_view import render_profile_view
 
@@ -101,9 +104,15 @@ with st.sidebar:
 
     st.divider()
     if user_logged_in:
-        if st.button("🔑 Daily Kite Login (1-Click)", use_container_width=True):
-            st.session_state["active_tab"] = "🔑 Authenticate"
-            st.rerun()
+        c_qa1, c_qa2 = st.columns(2)
+        with c_qa1:
+            if st.button("🔑 Kite Login", use_container_width=True):
+                st.session_state["active_tab"] = "🔑 Authenticate"
+                st.rerun()
+        with c_qa2:
+            if st.button("📢 Briefing", use_container_width=True):
+                st.session_state["active_tab"] = "📢 Morning Briefing"
+                st.rerun()
 
     st.caption("Secured with bcrypt & Model Context Protocol (MCP)")
 
@@ -114,6 +123,9 @@ if user_logged_in:
         "📊 Portfolio & Demat",
         "🔥 Live IPOs & GMP",
         "🤖 AI Research & Videos",
+        "🔍 Allotment Status",
+        "🔔 Listing Spikes",
+        "📢 Morning Briefing",
         "🔑 Authenticate",
         "👤 Profile & Password",
     ]
@@ -121,6 +133,8 @@ else:
     tabs = [
         "🔥 Live IPOs & GMP",
         "🤖 AI Research & Videos",
+        "🔍 Allotment Status",
+        "🔔 Listing Spikes",
         "🔒 Sign In / Demat",
     ]
 
@@ -148,6 +162,12 @@ elif selected_tab == "🔥 Live IPOs & GMP":
     render_ipo_view()
 elif selected_tab == "🤖 AI Research & Videos":
     render_ai_research_view()
+elif selected_tab == "🔍 Allotment Status":
+    render_allotment_view()
+elif selected_tab == "🔔 Listing Spikes":
+    render_listing_view()
+elif selected_tab == "📢 Morning Briefing":
+    render_alerts_view()
 elif selected_tab == "🔑 Authenticate":
     render_auth_view()
 elif selected_tab == "👤 Profile & Password":

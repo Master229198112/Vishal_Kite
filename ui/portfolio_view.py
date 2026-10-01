@@ -4,6 +4,7 @@ Displays live equity & ETF holdings, Zerodha Coin mutual funds,
 margins, open positions, and combined net worth metrics.
 """
 
+import altair as alt
 import pandas as pd
 import streamlit as st
 import auth_manager
@@ -81,10 +82,11 @@ def render_portfolio_view():
     st.divider()
 
     # Asset Sections Tabs
-    tab_eq, tab_mf, tab_pos = st.tabs([
+    tab_eq, tab_mf, tab_pos, tab_alloc = st.tabs([
         f"📈 Equities & ETFs ({len(holdings_res.get('holdings', []))})",
         f"🌱 Mutual Funds ({len(mf_res.get('mf_holdings', []))})",
         "⚡ Positions & Margins",
+        "🥧 Asset Allocation & Sectors",
     ])
 
     # TAB 1: Equities & ETFs
@@ -174,3 +176,61 @@ def render_portfolio_view():
             st.write(f"• **SPAN Margin:** ₹{eq_details.get('span_margin', 0.0):,.2f}")
             st.write(f"• **Exposure Margin:** ₹{eq_details.get('exposure_margin', 0.0):,.2f}")
             st.write(f"• **Collateral Value:** ₹{eq_details.get('collateral', 0.0):,.2f}")
+
+    # TAB 4: Asset Allocation & Sectors
+    with tab_alloc:
+        c_chart, c_tbl = st.columns([1.2, 1])
+
+        # Compute Allocation Percentages
+        base_total = total_net_worth if total_net_worth > 0 else 1.0
+        alloc_data = [
+            {"Asset Class": "Equities & ETFs", "Value": eq_cur_val, "Share %": round(eq_cur_val / base_total * 100, 1)},
+            {"Asset Class": "Mutual Funds (Coin)", "Value": mf_cur_val, "Share %": round(mf_cur_val / base_total * 100, 1)},
+            {"Asset Class": "Available Cash", "Value": cash_bal, "Share %": round(cash_bal / base_total * 100, 1)},
+        ]
+        df_alloc = pd.DataFrame(alloc_data)
+
+        with c_chart:
+            st.markdown("#### 🍩 Net Worth Asset Distribution")
+            donut_chart = (
+                alt.Chart(df_alloc)
+                .mark_arc(innerRadius=65, stroke="#0e1117", strokeWidth=2)
+                .encode(
+                    theta=alt.Theta(field="Value", type="quantitative"),
+                    color=alt.Color(
+                        field="Asset Class",
+                        type="nominal",
+                        scale=alt.Scale(
+                            domain=["Equities & ETFs", "Mutual Funds (Coin)", "Available Cash"],
+                            range=["#00e676", "#29b6f6", "#ffd54f"],
+                        ),
+                        legend=alt.Legend(orient="bottom", title=None),
+                    ),
+                    tooltip=[
+                        alt.Tooltip("Asset Class:N", title="Asset"),
+                        alt.Tooltip("Value:Q", title="Value (₹)", format=",.2f"),
+                        alt.Tooltip("Share %:Q", title="Allocation", format=".1f"),
+                    ],
+                )
+                .properties(height=260)
+            )
+            st.altair_chart(donut_chart, use_container_width=True)
+
+        with c_tbl:
+            st.markdown("#### 📊 Allocation Breakdown")
+            st.dataframe(
+                df_alloc.style.format({
+                    "Value": "₹{:,.2f}",
+                    "Share %": "{:.1f}%",
+                }),
+                use_container_width=True,
+                hide_index=True,
+            )
+
+            # Portfolio diversification indicator
+            if eq_cur_val > 0 and mf_cur_val > 0:
+                st.success("✅ **Balanced Multi-Asset Portfolio:** Blended allocation across equities, mutual funds, and liquidity.")
+            elif eq_cur_val > 0:
+                st.info("ℹ️ **Equity Focused:** Demat heavily weighted in direct equities.")
+            else:
+                st.caption("Add equity or mutual fund investments to see diversification analysis.")

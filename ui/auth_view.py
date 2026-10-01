@@ -136,3 +136,45 @@ def render_auth_view():
                             st.error("Could not extract access_token from response.")
                 except Exception as exc:
                     st.error(f"Authentication Failed: {exc}")
+
+    st.divider()
+
+    # 3. Fully Automated Headless TOTP Login
+    st.markdown("### 🤖 Fully Automated Headless Login (Zero-Browser)")
+    st.caption("Generate your daily token automatically using your Zerodha TOTP Secret without opening any browser.")
+
+    with st.expander("⚡ Run Headless TOTP Login", expanded=False):
+        c_h1, c_h2 = st.columns([1, 1])
+        with c_h1:
+            h_user = st.text_input("Zerodha User ID:", value=get_config("ZERODHA_USER_ID", "DF2893"), key="hl_uid")
+            h_pass = st.text_input("Zerodha Password:", type="password", key="hl_pwd")
+            h_totp = st.text_input(
+                "Zerodha TOTP Secret Key:",
+                type="password",
+                help="Base32 key from Zerodha Profile -> Security -> External 2FA",
+                key="hl_sec",
+            )
+        with c_h2:
+            st.info(
+                "**How to get your TOTP Secret Key:**\n\n"
+                "1. Open Zerodha Kite on web or mobile.\n"
+                "2. Go to **My Profile** -> **Password & Security**.\n"
+                "3. Click **Enable / Re-enable External 2FA (TOTP)**.\n"
+                "4. Copy the secret key (letters & numbers) displayed below the QR code.\n\n"
+                "*(You can also save `ZERODHA_TOTP_SECRET` in your `.env` or Streamlit Secrets)*"
+            )
+
+        if st.button("🚀 Run Headless Login & Refresh Token", type="primary", use_container_width=True):
+            from totp_auth import perform_headless_kite_login
+            with st.spinner("Executing headless login & TOTP verification..."):
+                ok, msg, new_tok = perform_headless_kite_login(
+                    user_id=h_user,
+                    password=h_pass,
+                    totp_secret=h_totp,
+                )
+                if ok and new_tok:
+                    st.balloons()
+                    st.success(f"🎉 {msg}")
+                    st.rerun()
+                else:
+                    st.error(f"❌ {msg}")
