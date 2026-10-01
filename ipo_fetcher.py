@@ -51,21 +51,33 @@ def fetch_upcoming_ipos() -> List[Dict[str, Any]]:
                 table = soup.find("table")
                 if table:
                     rows = table.find_all("tr")
-                    for row in rows[2:]:
-                        cols = row.find_all(["td", "th"])
+                    for row in rows:
+                        # 1. Skip any row containing <th> tags (table headers)
+                        if row.find("th") is not None:
+                            continue
+
+                        cols = row.find_all("td")
                         if len(cols) < 9:
                             continue
 
                         name_cell = cols[0]
                         a_tag = name_cell.find("a")
-                        raw_name = a_tag.get_text(strip=True) if a_tag else cols[0].get_text(strip=True)
-                        detail_url = a_tag["href"] if (a_tag and a_tag.has_attr("href")) else ""
+                        if not a_tag:
+                            # Genuine IPO listings on investorgain always contain an anchor tag
+                            continue
+
+                        raw_name = a_tag.get_text(strip=True)
+                        detail_url = a_tag["href"] if a_tag.has_attr("href") else ""
+
+                        # Clean sort symbols and extra spaces
+                        raw_name = re.sub(r"[▲▼\s]+", " ", raw_name).strip()
 
                         # Filter out leaked table headers from scraped HTML
                         if (
                             not raw_name
                             or raw_name.lower() in ["name", "company", "ipo name", "company name"]
                             or "price" in cols[4].get_text().lower()
+                            or "gmp" in cols[1].get_text().lower()
                         ):
                             continue
 
@@ -73,7 +85,7 @@ def fetch_upcoming_ipos() -> List[Dict[str, Any]]:
                         is_sme = "SME" in name_cell.get_text().upper()
                         company_name = re.sub(r"(BSE|NSE|SME|[OU])+$", "", raw_name).strip()
                         company_name = re.sub(r"\s+", " ", company_name).strip()
-                        if not company_name or company_name.lower() == "name":
+                        if not company_name or company_name.lower() in ["name", "company", "ipo name"]:
                             continue
 
                         raw_gmp = cols[1].get_text(strip=True)

@@ -79,8 +79,14 @@ def render_ipo_view():
         st.info("No active or upcoming IPOs found at the moment.")
         return
 
-    # 2. Filter Logic
-    filtered_ipos = list(ipos)
+    # 2. Filter Logic & Secondary Header Defense
+    header_blacklist = {"name", "company", "ipo name", "company name"}
+    filtered_ipos = [
+        i for i in ipos
+        if i.get("company_name", "").strip().lower() not in header_blacklist
+        and "price" not in str(i.get("price_band", "")).lower()
+        and "gmp" not in str(i.get("company_name", "")).lower()
+    ]
     if category_filter != "All":
         filtered_ipos = [i for i in filtered_ipos if i.get("type") == category_filter]
     if status_filter != "All":
