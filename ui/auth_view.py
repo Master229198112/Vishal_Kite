@@ -150,19 +150,24 @@ def render_auth_view():
             h_user = st.text_input("Zerodha User ID:", value=get_config("ZERODHA_USER_ID", "DF2893"), key="hl_uid")
             h_pass = st.text_input("Zerodha Password:", type="password", key="hl_pwd")
             h_totp = st.text_input(
-                "Zerodha TOTP Secret Key:",
+                "Zerodha TOTP Secret Key OR 6-Digit App Code:",
                 type="password",
-                help="Base32 key from Zerodha Profile -> Security -> External 2FA",
+                placeholder="Paste 16-char Secret OR 6-digit code (e.g. 582910)",
+                help="Enter your 16-32 char TOTP Secret Key (for permanent auto-login) OR current 6-digit code from your Authenticator app",
                 key="hl_sec",
             )
         with c_h2:
             st.info(
-                "**How to get your TOTP Secret Key:**\n\n"
-                "1. Open Zerodha Kite on web or mobile.\n"
-                "2. Go to **My Profile** -> **Password & Security**.\n"
-                "3. Click **Enable / Re-enable External 2FA (TOTP)**.\n"
-                "4. Copy the secret key (letters & numbers) displayed below the QR code.\n\n"
-                "*(You can also save `ZERODHA_TOTP_SECRET` in your `.env` or Streamlit Secrets)*"
+                "**Two Simple Ways to Complete 2FA:**\n\n"
+                "• **Option A — Instant (No setup needed):**\n"
+                "Open your Authenticator App, check your current **6-digit code** (e.g. `482910`), and paste it in the box on the left!\n\n"
+                "• **Option B — Permanent Auto-Login:**\n"
+                "To get your permanent Secret Key (so you never need to check your phone again):\n"
+                "1. On Zerodha Kite -> **Profile** -> **Password & Security**.\n"
+                "2. Click **Disable external TOTP**.\n"
+                "3. Immediately click **Enable external TOTP**.\n"
+                "4. Zerodha will reveal the QR code AND the **text Secret Key** below it.\n"
+                "5. Re-scan in your Authenticator app & paste that secret key here (or in `.env` / Streamlit Secrets as `ZERODHA_TOTP_SECRET`)."
             )
 
         if st.button("🚀 Run Headless Login & Refresh Token", type="primary", use_container_width=True):

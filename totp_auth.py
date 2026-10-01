@@ -82,8 +82,12 @@ def perform_headless_kite_login(
             if not request_id:
                 return False, "Failed to retrieve 2FA request_id from Zerodha.", None
 
-            # 2. Second factor 2FA using auto-generated RFC 6238 TOTP
-            totp_code = generate_totp(sec)
+            # 2. Second factor 2FA using auto-generated RFC 6238 TOTP or direct 6-digit code
+            clean_sec = sec.strip()
+            if len(clean_sec) == 6 and clean_sec.isdigit():
+                totp_code = clean_sec
+            else:
+                totp_code = generate_totp(clean_sec)
             twofa_url = "https://kite.zerodha.com/api/twofa"
             resp2 = client.post(
                 twofa_url,
