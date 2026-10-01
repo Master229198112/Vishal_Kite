@@ -7,18 +7,19 @@ import asyncio
 import unittest
 from unittest.mock import MagicMock, patch
 
-from kite_mcp import get_holdings, get_margins, get_positions, get_quote, mcp
+from kite_mcp import get_holdings, get_margins, get_mf_holdings, get_positions, get_quote, mcp
 
 
 class TestKiteMCPServer(unittest.TestCase):
 
     def test_registered_tools(self):
-        """Verify that exactly the 4 required read-only tools are registered."""
+        """Verify that read-only tools including mutual funds are registered."""
 
         async def run_check():
             tools = await mcp.list_tools()
             tool_names = [t.name for t in tools]
             self.assertIn("get_holdings", tool_names)
+            self.assertIn("get_mf_holdings", tool_names)
             self.assertIn("get_positions", tool_names)
             self.assertIn("get_margins", tool_names)
             self.assertIn("get_quote", tool_names)
@@ -33,7 +34,7 @@ class TestKiteMCPServer(unittest.TestCase):
 
         asyncio.run(run_check())
 
-    @patch("kite_mcp.get_kite_client")
+    @patch("kite_service.get_kite_client")
     def test_unauthenticated_graceful_handling(self, mock_get_client):
         """Verify graceful error reporting when credentials are missing or token has expired."""
         mock_get_client.side_effect = RuntimeError("KITE_ACCESS_TOKEN is missing")
@@ -41,7 +42,7 @@ class TestKiteMCPServer(unittest.TestCase):
         self.assertEqual(result["status"], "error")
         self.assertIn("missing", result["message"])
 
-    @patch("kite_mcp.get_kite_client")
+    @patch("kite_service.get_kite_client")
     def test_get_holdings_calculations(self, mock_get_client):
         """Verify calculation of total investment, value, and P&L in get_holdings."""
         mock_kite = MagicMock()
@@ -88,7 +89,34 @@ class TestKiteMCPServer(unittest.TestCase):
         # PnL %: 2000 / 30000 * 100 = 6.67%
         self.assertEqual(summary["total_pnl_percentage"], 6.67)
 
-    @patch("kite_mcp.get_kite_client")
+    @patch("kite_service.get_kite_client")
+    def test_get_mf_holdings(self, mock_get_client):
+        """Verify mutual fund holdings formatting and total return calculation."""
+        mock_kite = MagicMock()
+        mock_kite.mf_holdings.return_value = [
+            {
+                "folio": "12345/67",
+                "fund": "Nippon India Small Cap Fund",
+                "tradingsymbol": "INF204K01W69",
+                "quantity": 100.0,
+                "average_price": 100.0,
+                "last_price": 120.0,
+                "pnl": 2000.0,
+                "last_price_date": "2026-09-30",
+            }
+        ]
+        mock_get_client.return_value = mock_kite
+
+        result = get_mf_holdings()
+        self.assertEqual(result["status"], "success")
+        summary = result["summary"]
+        self.assertEqual(summary["total_funds_count"], 1)
+        self.assertEqual(summary["total_investment"], 10000.0)
+        self.assertEqual(summary["current_value"], 12000.0)
+        self.assertEqual(summary["total_pnl"], 2000.0)
+        self.assertEqual(summary["total_pnl_percentage"], 20.0)
+
+    @patch("kite_service.get_kite_client")
     def test_get_positions(self, mock_get_client):
         """Verify position filtering and totals in get_positions."""
         mock_kite = MagicMock()
@@ -130,7 +158,7 @@ class TestKiteMCPServer(unittest.TestCase):
         self.assertEqual(len(result["open_positions"]), 1)
         self.assertEqual(result["open_positions"][0]["tradingsymbol"], "NIFTY24OCTFUT")
 
-    @patch("kite_mcp.get_kite_client")
+    @patch("kite_service.get_kite_client")
     def test_get_margins(self, mock_get_client):
         """Verify get_margins summary extraction."""
         mock_kite = MagicMock()
@@ -152,7 +180,7 @@ class TestKiteMCPServer(unittest.TestCase):
         self.assertEqual(result["summary"]["available_cash"], 150000.0)
         self.assertEqual(result["summary"]["used_margin"], 10000.0)
 
-    @patch("kite_mcp.get_kite_client")
+    @patch("kite_service.get_kite_client")
     def test_get_quote(self, mock_get_client):
         """Verify get_quote symbol formatting and quote retrieval."""
         mock_kite = MagicMock()
@@ -218,8 +246,9 @@ class TestKiteMCPServer(unittest.TestCase):
             tools = tools_res.get("result", {}).get("tools", [])
             tool_names = [t["name"] for t in tools]
 
-            self.assertEqual(len(tools), 4)
+            self.assertEqual(len(tools), 5)
             self.assertIn("get_holdings", tool_names)
+            self.assertIn("get_mf_holdings", tool_names)
             self.assertIn("get_positions", tool_names)
             self.assertIn("get_margins", tool_names)
             self.assertIn("get_quote", tool_names)

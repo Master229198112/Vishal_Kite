@@ -22,16 +22,18 @@ INVESTORGAIN_GMP_URL = "https://www.investorgain.com/report/ipo-gmp-live/331/"
 
 
 def _clean_text(text: str) -> str:
-    """Normalize whitespace and strip symbols."""
+    """Normalize whitespace and strip symbols and attached GMP markers."""
     if not text:
         return ""
     cleaned = re.sub(r"\s+", " ", text).strip()
-    return cleaned.replace("₹", "Rs.").replace("Cr", " Cr")
+    cleaned = re.sub(r"GMP:.*", "", cleaned).strip()
+    return cleaned.replace("₹", "").replace("Rs.", "").replace("Rs", "")
 
 
 def _safe_float(val: str, default: float = 0.0) -> float:
-    """Safely extract float number from a messy string."""
-    match = re.search(r"[-+]?\d*\.?\d+", val.replace(",", ""))
+    """Safely extract float number without decimal ambiguity."""
+    cleaned = val.replace(",", "").replace("₹", "").replace("Rs.", "").strip()
+    match = re.search(r"[-+]?\d+(?:\.\d+)?", cleaned)
     return float(match.group()) if match else default
 
 
@@ -59,15 +61,28 @@ def fetch_upcoming_ipos() -> List[Dict[str, Any]]:
                         raw_name = a_tag.get_text(strip=True) if a_tag else cols[0].get_text(strip=True)
                         detail_url = a_tag["href"] if (a_tag and a_tag.has_attr("href")) else ""
 
-                        # Detect category / exchange
-                        is_sme = "SME" in name_cell.get_text()
-                        company_name = re.sub(r"(BSE|NSE|SME|[OU])+$", "", raw_name).strip()
+                        # Filter out leaked table headers from scraped HTML
+                        if (
+                            not raw_name
+                            or raw_name.lower() in ["name", "company", "ipo name", "company name"]
+                            or "price" in cols[4].get_text().lower()
+                        ):
+                            continue
 
-                        gmp_text = _clean_text(cols[1].get_text(strip=True))
-                        gmp_val = _safe_float(gmp_text)
-                        
+                        # Detect category / exchange
+                        is_sme = "SME" in name_cell.get_text().upper()
+                        company_name = re.sub(r"(BSE|NSE|SME|[OU])+$", "", raw_name).strip()
+                        company_name = re.sub(r"\s+", " ", company_name).strip()
+                        if not company_name or company_name.lower() == "name":
+                            continue
+
+                        raw_gmp = cols[1].get_text(strip=True)
+                        gmp_clean = raw_gmp.replace("₹", "").replace("Rs.", "").strip()
+                        m_gmp = re.search(r"[-+]?\d+(?:\.\d+)?", gmp_clean)
+                        gmp_val = float(m_gmp.group()) if m_gmp else 0.0
+
                         # Extract percentage gain if available
-                        pct_match = re.search(r"\(([-+]?\d+\.?\d*)%\)", gmp_text)
+                        pct_match = re.search(r"\(([-+]?\d+\.?\d*)%\)", raw_gmp)
                         gmp_pct = float(pct_match.group(1)) if pct_match else 0.0
 
                         sub_text = _clean_text(cols[3].get_text(strip=True))
@@ -81,7 +96,13 @@ def fetch_upcoming_ipos() -> List[Dict[str, Any]]:
                         listing_date = _clean_text(cols[10].get_text(strip=True)) if len(cols) > 10 else ""
 
                         # Status check
-                        status = "Open" if "O" in name_cell.get_text() else "Upcoming"
+                        cell_text = name_cell.get_text().strip()
+                        if cell_text.endswith("O") or "Open" in cell_text:
+                            status = "Open"
+                        elif cell_text.endswith("U") or "Upcoming" in cell_text:
+                            status = "Upcoming"
+                        else:
+                            status = "Closed"
 
                         ipos.append({
                             "company_name": company_name,
