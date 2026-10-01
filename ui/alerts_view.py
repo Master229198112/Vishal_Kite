@@ -7,6 +7,7 @@ via Telegram Bot and 1-click WhatsApp sharing.
 import streamlit as st
 from config import get_config
 import notifications
+from ui.common import render_back_to_top
 
 
 def render_alerts_view():
@@ -91,3 +92,5 @@ def render_alerts_view():
                    ```
                 """
             )
+
+    render_back_to_top()

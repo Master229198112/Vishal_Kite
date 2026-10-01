@@ -7,6 +7,7 @@ current market prices (CMP), and intraday spike/drop alerts.
 import pandas as pd
 import streamlit as st
 import ipo_mcp
+from ui.common import render_back_to_top
 
 
 def _style_gain(val):
@@ -129,3 +130,5 @@ def render_listing_view():
         st.dataframe(styler, use_container_width=True, hide_index=True)
     else:
         st.warning("No listings match your criteria.")
+
+    render_back_to_top()

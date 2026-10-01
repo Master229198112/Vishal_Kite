@@ -7,6 +7,7 @@ subscription demand, and color-coded status categories.
 import pandas as pd
 import streamlit as st
 import ipo_mcp
+from ui.common import render_back_to_top
 
 
 def _style_status(val: str) -> str:
@@ -171,3 +172,5 @@ def render_ipo_view():
         st.dataframe(styler, use_container_width=True, hide_index=True)
     else:
         st.warning("No IPOs match your filter criteria.")
+
+    render_back_to_top()

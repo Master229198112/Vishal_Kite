@@ -7,6 +7,7 @@ Provides 1-click status checking across all major Indian IPO registrars
 import streamlit as st
 import allotment_checker
 import ipo_mcp
+from ui.common import render_back_to_top
 
 
 def render_allotment_view():
@@ -131,3 +132,5 @@ def render_allotment_view():
             3. **Zerodha Kite Holdings**: Check the **📊 Portfolio & Demat** tab on listing day morning at 8:30 AM — allotted shares will automatically appear under your holdings!
             """
         )
+
+    render_back_to_top()

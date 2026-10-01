@@ -11,6 +11,7 @@ import streamlit as st
 
 from authenticate import parse_request_token
 from config import get_access_token, get_config, set_access_token
+from ui.common import render_back_to_top
 
 
 def check_auth_status():
@@ -178,3 +179,5 @@ def render_auth_view():
                     st.rerun()
                 else:
                     st.error(f"❌ {msg}")
+
+    render_back_to_top()

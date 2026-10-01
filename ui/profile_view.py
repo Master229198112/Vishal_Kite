@@ -6,6 +6,7 @@ and secure bcrypt password management.
 
 import streamlit as st
 import auth_manager
+from ui.common import render_back_to_top
 
 
 def render_profile_view():
@@ -95,3 +96,5 @@ def render_profile_view():
                         st.success(f"✅ {msg}")
                     else:
                         st.error(f"❌ {msg}")
+
+    render_back_to_top()

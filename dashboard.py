@@ -31,10 +31,13 @@ st.set_page_config(
 # Auto-handle Zerodha OAuth redirect if returning from authorization
 auto_handle_oauth_redirect(get_config("KITE_API_KEY"), get_config("KITE_API_SECRET"))
 
-# 2. Sleek Dark Theme Custom Styling
+# 2. Sleek Dark Theme Custom Styling & Navigation Elements
 st.markdown(
     """
     <style>
+    html, body, [data-testid="stAppViewContainer"], .main {
+        scroll-behavior: smooth !important;
+    }
     .main { background-color: #0e1117; }
     .stMetric { background-color: #1e222d; padding: 14px; border-radius: 8px; border: 1px solid #2e3342; }
     div[data-testid="stSidebar"] { background-color: #131722; border-right: 1px solid #2e3342; }
@@ -42,7 +45,61 @@ st.markdown(
     .status-badge-err { color: #ff5252; font-weight: bold; }
     .status-badge-guest { color: #ffd54f; font-weight: bold; }
     .role-badge { background-color: #1b5e20; color: #a5d6a7; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; font-weight: bold; }
+
+    /* Back to Top UI Components */
+    .back-to-top-inline {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 24px;
+        background-color: #1e222d;
+        color: #90caf9 !important;
+        border: 1px solid #2e3342;
+        border-radius: 24px;
+        text-decoration: none !important;
+        font-size: 0.92rem;
+        font-weight: 500;
+        transition: all 0.25s ease-in-out;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+    .back-to-top-inline:hover {
+        background-color: #29b6f6;
+        color: #0e1117 !important;
+        border-color: #29b6f6;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(41, 182, 246, 0.35);
+    }
+    .back-to-top-floating {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background-color: #1e222d;
+        color: #90caf9 !important;
+        border: 1px solid #3d4457;
+        border-radius: 30px;
+        padding: 8px 18px;
+        font-size: 0.86rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+        z-index: 99999;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.25s ease-in-out;
+    }
+    .back-to-top-floating:hover {
+        background-color: #00e676;
+        color: #0e1117 !important;
+        border-color: #00e676;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(0, 230, 118, 0.4);
+    }
     </style>
+    <div id="top-of-page"></div>
+    <a href="#top-of-page" target="_self" class="back-to-top-floating" title="Back to Top">
+        ⬆️ Top
+    </a>
     """,
     unsafe_allow_html=True,
 )

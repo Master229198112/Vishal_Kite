@@ -9,6 +9,7 @@ import pandas as pd
 import streamlit as st
 import auth_manager
 import kite_mcp
+from ui.common import render_back_to_top
 
 
 def render_portfolio_view():
@@ -255,3 +256,5 @@ def render_portfolio_view():
                 st.info("ℹ️ **Equity Focused:** Demat heavily weighted in direct equities.")
             else:
                 st.caption("Add equity or mutual fund investments to see diversification analysis.")
+
+    render_back_to_top()

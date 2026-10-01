@@ -5,6 +5,7 @@ Generates institutional research reports using Google Gemini and curates YouTube
 
 import streamlit as st
 import ipo_mcp
+from ui.common import render_back_to_top
 
 
 def render_ai_research_view():
@@ -120,15 +121,6 @@ def render_ai_research_view():
         st.progress(min(overall_score / 10.0, 1.0))
         st.info(f"**Verdict:** {verdict}")
 
-        # Regulatory & Self-Research Safety Disclaimer
-        st.warning(
-            "⚠️ **Investor Due Diligence & Self-Research Disclaimer:**\n"
-            "This AI synthesis, quantitative score, and listing gain estimate are generated algorithmically by Google Gemini for informational and educational analysis only. "
-            "**They do NOT constitute investment advice, buy/sell recommendations, or a financial solicitation.** "
-            "IPOs (especially SME issues) carry significant market risks, including listing day volatility, price swings, and potential loss of capital. "
-            "Always conduct your own independent due diligence, examine the company's Red Herring Prospectus (RHP), and consult a certified SEBI-registered financial advisor before applying."
-        )
-
         # AI Narrative Memo
         target_name = st.session_state.get("active_analysis_target", "")
         target_lang = st.session_state.get("active_analysis_lang", "English")
@@ -159,3 +151,16 @@ def render_ai_research_view():
                     )
         else:
             st.caption("No video reviews found.")
+
+        st.divider()
+
+        # Regulatory & Self-Research Safety Disclaimer (Positioned at bottom)
+        st.warning(
+            "⚠️ **Investor Due Diligence & Self-Research Disclaimer:**\n"
+            "This AI synthesis, quantitative score, and listing gain estimate are generated algorithmically by Google Gemini for informational and educational analysis only. "
+            "**They do NOT constitute investment advice, buy/sell recommendations, or a financial solicitation.** "
+            "IPOs (especially SME issues) carry significant market risks, including listing day volatility, price swings, and potential loss of capital. "
+            "Always conduct your own independent due diligence, examine the company's Red Herring Prospectus (RHP), and consult a certified SEBI-registered financial advisor before applying."
+        )
+
+        render_back_to_top()
