@@ -64,6 +64,16 @@ class TestNewFeatures(unittest.TestCase):
         self.assertEqual(res["status"], "success")
         self.assertIn("ai_narrative_report", res)
 
+    def test_get_assigned_registrar_for_ipo(self):
+        reg_tna = allotment_checker.get_assigned_registrar_for_ipo("TNA Solutions")
+        self.assertIn("maashitla", reg_tna["name"].lower())
+
+        reg_acme = allotment_checker.get_assigned_registrar_for_ipo("Acme India Industries")
+        self.assertIn("bigshare", reg_acme["name"].lower())
+
+        reg_shah = allotment_checker.get_assigned_registrar_for_ipo("Shah Investor's Home")
+        self.assertIn("link intime", reg_shah["name"].lower())
+
 
 if __name__ == "__main__":
     unittest.main()

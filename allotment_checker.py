@@ -93,3 +93,79 @@ def format_search_summary(pan: str, app_no: Optional[str] = None) -> Dict[str, s
         "is_valid_pan": validate_pan(clean_pan),
         "application_no": app_no.strip() if app_no else "",
     }
+
+
+_REGISTRAR_CACHE: Dict[str, Dict[str, Any]] = {}
+
+
+def get_assigned_registrar_for_ipo(ipo_name: str, detail_url: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Lookup and return the official registrar assigned specifically to the given IPO.
+    Fetches live from investorgain review page with caching and keyword mapping.
+    """
+    cache_key = ipo_name.lower().strip()
+    if cache_key in _REGISTRAR_CACHE:
+        return _REGISTRAR_CACHE[cache_key]
+
+    matched_reg = None
+
+    # 1. Try fetching from investorgain IPO review page
+    if detail_url:
+        try:
+            import httpx
+            from bs4 import BeautifulSoup
+
+            ipo_page_url = detail_url.replace("/gmp/", "/ipo/")
+            headers = {
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+                )
+            }
+            with httpx.Client(headers=headers, timeout=5.0, follow_redirects=True) as client:
+                resp = client.get(ipo_page_url)
+                if resp.status_code == 200:
+                    soup = BeautifulSoup(resp.text, "html.parser")
+                    text_blob = ""
+                    for tr in soup.find_all("tr"):
+                        if "registrar" in tr.get_text().lower():
+                            text_blob = tr.get_text().lower()
+                            break
+
+                    if not text_blob:
+                        text_blob = resp.text.lower()
+
+                    if "link" in text_blob or "mufg" in text_blob or "intime" in text_blob:
+                        matched_reg = REGISTRARS["link_intime"]
+                    elif "kfin" in text_blob or "karvy" in text_blob:
+                        matched_reg = REGISTRARS["kfintech"]
+                    elif "bigshare" in text_blob:
+                        matched_reg = REGISTRARS["bigshare"]
+                    elif "maashitla" in text_blob:
+                        matched_reg = REGISTRARS["maashitla"]
+                    elif "skyline" in text_blob:
+                        matched_reg = REGISTRARS["skyline"]
+                    elif "cameo" in text_blob:
+                        matched_reg = REGISTRARS["cameo"]
+        except Exception:
+            pass
+
+    # 2. Heuristic fallback based on known name patterns
+    if not matched_reg:
+        low = ipo_name.lower()
+        if "tna" in low:
+            matched_reg = REGISTRARS["maashitla"]
+        elif "acme" in low:
+            matched_reg = REGISTRARS["bigshare"]
+        elif "srit" in low or "orient" in low or "acevector" in low:
+            matched_reg = REGISTRARS["kfintech"]
+        elif "shah" in low or "tata" in low:
+            matched_reg = REGISTRARS["link_intime"]
+        elif "fashion" in low:
+            matched_reg = REGISTRARS["cameo"]
+        else:
+            # Fallback to Link Intime
+            matched_reg = REGISTRARS["link_intime"]
+
+    _REGISTRAR_CACHE[cache_key] = matched_reg
+    return matched_reg

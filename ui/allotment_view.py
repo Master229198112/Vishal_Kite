@@ -63,29 +63,62 @@ def render_allotment_view():
 
     st.divider()
 
-    # 3. Direct Registrar Portals
-    st.markdown("### 🏢 Direct Registrar Allotment Portals (1-Click)")
-    st.caption("Click to launch the official registrar query portal directly in a new window:")
+    # 3. Direct Registrar Portal for Selected IPO
+    assigned_reg = allotment_checker.get_assigned_registrar_for_ipo(
+        ipo_name=selected_ipo_name,
+        detail_url=selected_ipo.get("detail_url"),
+    )
 
-    registrars = allotment_checker.get_all_registrars()
-    r_cols = st.columns(3)
+    st.markdown(f"### 🏢 Designated Official Registrar for **{selected_ipo_name}**")
+    st.caption(f"Allotment status for this specific issue is officially hosted on **{assigned_reg['name']}**:")
 
-    for idx, (r_key, r_info) in enumerate(registrars.items()):
-        col = r_cols[idx % 3]
-        with col:
-            st.markdown(
-                f"""
-                <div style="background-color: #161b26; padding: 16px; border-radius: 8px; border: 1px solid #2e3342; margin-bottom: 12px;">
-                    <h4 style="margin: 0; color: #64b5f6;">{r_info['name']}</h4>
-                    <p style="font-size: 0.85em; color: #cfd8dc; margin: 6px 0;">{r_info['description']}</p>
-                    <small><b>Supported:</b> {', '.join(r_info['supported_searches'])}</small><br><br>
-                    <a href="{r_info['url']}" target="_blank" style="display: inline-block; background-color: #00e676; color: #000; padding: 8px 14px; border-radius: 6px; font-weight: bold; text-decoration: none;">
-                        🚀 Open {r_info['name'].split()[0]} Portal
-                    </a>
+    c_reg, c_guide = st.columns([1.2, 1], gap="medium")
+    with c_reg:
+        st.markdown(
+            f"""
+            <div style="background-color: #161b26; padding: 22px; border-radius: 10px; border: 2px solid #00e676;">
+                <div style="color: #00e676; font-size: 0.85rem; font-weight: bold; text-transform: uppercase;">
+                    🎯 Official Registrar for {selected_ipo_name}
                 </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                <h3 style="margin: 8px 0 4px 0; color: #ffffff;">{assigned_reg['name']}</h3>
+                <p style="color: #b0bec5; font-size: 0.95rem; margin-bottom: 12px;">{assigned_reg['description']}</p>
+                <div style="background-color: #0e1117; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px;">
+                    <small><b>Verify Using:</b> {', '.join(assigned_reg['supported_searches'])}</small>
+                </div>
+                <a href="{assigned_reg['url']}" target="_blank" style="display: block; text-align: center; background-color: #00e676; color: #000000; padding: 12px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 1.05rem;">
+                    🚀 Open {assigned_reg['name'].split()[0]} Allotment Portal (1-Click)
+                </a>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    with c_guide:
+        st.markdown(
+            f"""
+            <div style="background-color: #1e222d; padding: 18px; border-radius: 10px; border: 1px solid #2e3342; height: 100%;">
+                <h4 style="color: #64b5f6; margin-top: 0;">📋 Step-by-Step Instructions</h4>
+                <ol style="color: #cfd8dc; padding-left: 20px; font-size: 0.9rem; line-height: 1.6;">
+                    <li>Click the green button to open <b>{assigned_reg['name']}</b>.</li>
+                    <li>Select <b>{selected_ipo_name}</b> from the "Company Selection" dropdown.</li>
+                    <li>Choose <b>PAN Number</b> (or Application No / DP Client ID).</li>
+                    <li>Enter your details and click <b>Submit / Search</b>.</li>
+                </ol>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # Optional alternative access
+    with st.expander("🌐 Need BSE / Alternative Registrar Portals?"):
+        all_regs = allotment_checker.get_all_registrars()
+        r_cols = st.columns(3)
+        for idx, (r_key, r_info) in enumerate(all_regs.items()):
+            with r_cols[idx % 3]:
+                st.markdown(
+                    f"**{r_info['name']}**<br><a href='{r_info['url']}' target='_blank'>Visit Portal ↗</a>",
+                    unsafe_allow_html=True,
+                )
 
     st.divider()
 

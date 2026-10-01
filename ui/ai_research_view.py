@@ -73,15 +73,61 @@ def render_ai_research_view():
 
         st.divider()
 
-        # Scorecard Row
+        # Scorecard Row - Custom Responsive Cards to avoid truncation
         sc1, sc2, sc3, sc4 = st.columns(4)
-        sc1.metric("Overall Score", f"{overall_score} / 10")
-        sc2.metric("Listing Gain Potential", gain_pot)
-        sc3.metric("Risk Level", risk)
-        sc4.metric("AI Engine", ai_powered_by)
+        with sc1:
+            st.markdown(
+                f"""
+                <div style="background-color: #1e222d; padding: 14px 16px; border-radius: 8px; border: 1px solid #2e3342; height: 100%;">
+                    <div style="color: #90caf9; font-size: 0.82rem; font-weight: 500; text-transform: uppercase;">Overall Score</div>
+                    <div style="font-size: 1.6rem; font-weight: bold; margin-top: 4px; color: #ffffff;">{overall_score} <span style="font-size: 1rem; color: #78909c;">/ 10</span></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with sc2:
+            st.markdown(
+                f"""
+                <div style="background-color: #1e222d; padding: 14px 16px; border-radius: 8px; border: 1px solid #2e3342; height: 100%;">
+                    <div style="color: #90caf9; font-size: 0.82rem; font-weight: 500; text-transform: uppercase;">Listing Gain Potential</div>
+                    <div style="font-size: 1.22rem; font-weight: bold; margin-top: 4px; color: #00e676; line-height: 1.3;">{gain_pot}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with sc3:
+            st.markdown(
+                f"""
+                <div style="background-color: #1e222d; padding: 14px 16px; border-radius: 8px; border: 1px solid #2e3342; height: 100%;">
+                    <div style="color: #90caf9; font-size: 0.82rem; font-weight: 500; text-transform: uppercase;">Risk Level</div>
+                    <div style="font-size: 1.35rem; font-weight: bold; margin-top: 4px; color: #ffffff;">{risk}</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        with sc4:
+            st.markdown(
+                f"""
+                <div style="background-color: #1e222d; padding: 14px 16px; border-radius: 8px; border: 1px solid #2e3342; height: 100%;">
+                    <div style="color: #90caf9; font-size: 0.82rem; font-weight: 500; text-transform: uppercase;">AI Engine</div>
+                    <div style="font-size: 1.05rem; font-weight: 600; margin-top: 6px; color: #81c784;">Google Gemini AI</div>
+                    <div style="font-size: 0.72rem; color: #78909c;">Automated Intelligence</div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
 
         st.progress(min(overall_score / 10.0, 1.0))
         st.info(f"**Verdict:** {verdict}")
+
+        # Regulatory & Self-Research Safety Disclaimer
+        st.warning(
+            "⚠️ **Investor Due Diligence & Self-Research Disclaimer:**\n"
+            "This AI synthesis, quantitative score, and listing gain estimate are generated algorithmically by Google Gemini for informational and educational analysis only. "
+            "**They do NOT constitute investment advice, buy/sell recommendations, or a financial solicitation.** "
+            "IPOs (especially SME issues) carry significant market risks, including listing day volatility, price swings, and potential loss of capital. "
+            "Always conduct your own independent due diligence, examine the company's Red Herring Prospectus (RHP), and consult a certified SEBI-registered financial advisor before applying."
+        )
 
         # AI Narrative Memo
         target_name = st.session_state.get("active_analysis_target", "")
