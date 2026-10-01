@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "zerodha-kite": {
+      "command": "python",
+      "args": ["kite_mcp.py"],
+      "env": {
+        "PYTHONPATH": "."
+      }
+    },
+    "ipo-research": {
+      "command": "python",
+      "args": ["ipo_mcp.py"],
+      "env": {
+        "PYTHONPATH": "."
+      }
+    }
+  }
+}
