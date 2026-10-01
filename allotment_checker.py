@@ -9,23 +9,23 @@ from typing import Any, Dict, List, Optional
 
 REGISTRARS = {
     "link_intime": {
-        "name": "Link Intime India Pvt Ltd",
-        "url": "https://linkintime.co.in/initial_offer/public-issues.html",
-        "alt_url": "https://web.linkintime.co.in/client-downloads/IPO_allotment.html",
+        "name": "MUFG Link Intime India Pvt Ltd",
+        "url": "https://in.mpms.mufg.com/Initial_Offer/public-issues.html",
+        "alt_url": "https://linkintime.co.in/initial_offer/public-issues.html",
         "supported_searches": ["PAN Number", "Application Number", "DP/Client ID", "Account No"],
         "description": "Primary registrar for large Mainboard issues (Tata, Bajaj, Hyundai, etc.).",
     },
     "kfintech": {
         "name": "KFin Technologies Ltd (KFintech)",
-        "url": "https://ris.kfintech.com/ipostatus/",
-        "alt_url": "https://kosmic.kfintech.com/ipostatus/",
+        "url": "https://ipostatus.kfintech.com/",
+        "alt_url": "https://ris.kfintech.com/ipostatus/",
         "supported_searches": ["PAN Number", "Application Number", "DP/Client ID"],
         "description": "Major registrar for top Mainboard and select SME issues.",
     },
     "bigshare": {
         "name": "Bigshare Services Pvt Ltd",
         "url": "https://ipo.bigshareonline.com/ipo_status.html",
-        "alt_url": "https://www.bigshareonline.com/InvestorIPOStatus.html",
+        "alt_url": "https://ipo1.bigshareonline.com/ipo_status.html",
         "supported_searches": ["PAN Number", "Application Number", "Beneficiary ID"],
         "description": "Most prominent registrar for BSE & NSE SME IPO listings.",
     },
@@ -49,6 +49,13 @@ REGISTRARS = {
         "alt_url": "https://www.cameoindia.com/",
         "supported_searches": ["PAN Number", "Folio / DP ID", "Application Number"],
         "description": "Registrar based in South India serving industrial & consumer IPOs.",
+    },
+    "purva": {
+        "name": "Purva Sharegistry (India) Pvt Ltd",
+        "url": "https://www.purvashare.com/investor-service/ipo-query",
+        "alt_url": "https://www.purvashare.com/",
+        "supported_searches": ["PAN Number", "Application Number", "DP ID"],
+        "description": "Specialist registrar for regional and SME public issues.",
     },
     "bse_official": {
         "name": "BSE India Official Allotment Check",
@@ -147,6 +154,8 @@ def get_assigned_registrar_for_ipo(ipo_name: str, detail_url: Optional[str] = No
                         matched_reg = REGISTRARS["skyline"]
                     elif "cameo" in text_blob:
                         matched_reg = REGISTRARS["cameo"]
+                    elif "purva" in text_blob:
+                        matched_reg = REGISTRARS["purva"]
         except Exception:
             pass
 
