@@ -66,7 +66,7 @@ with st.sidebar:
 
         if st.button("🚪 Sign Out", key="sidebar_logout_btn", use_container_width=True):
             auth_manager.logout_session()
-            st.session_state["active_tab"] = "🔥 Live IPOs & GMP"
+            st.session_state["nav_tab"] = "🔥 Live IPOs & GMP"
             st.rerun()
     else:
         st.markdown("👤 **Visitor Access:** <span class='status-badge-guest'>Guest Mode</span>", unsafe_allow_html=True)
@@ -81,7 +81,7 @@ with st.sidebar:
                     ok, msg, u_obj = auth_manager.authenticate_user(u_in, p_in)
                     if ok and u_obj:
                         auth_manager.login_session(u_obj)
-                        st.session_state["active_tab"] = "📊 Portfolio & Demat"
+                        st.session_state["nav_tab"] = "📊 Portfolio & Demat"
                         st.rerun()
                     else:
                         st.error(msg)
@@ -107,11 +107,11 @@ with st.sidebar:
         c_qa1, c_qa2 = st.columns(2)
         with c_qa1:
             if st.button("🔑 Kite Login", use_container_width=True):
-                st.session_state["active_tab"] = "🔑 Authenticate"
+                st.session_state["nav_tab"] = "🔑 Authenticate"
                 st.rerun()
         with c_qa2:
             if st.button("📢 Briefing", use_container_width=True):
-                st.session_state["active_tab"] = "📢 Morning Briefing"
+                st.session_state["nav_tab"] = "📢 Morning Briefing"
                 st.rerun()
 
     st.caption("Secured with bcrypt & Model Context Protocol (MCP)")
@@ -138,20 +138,17 @@ else:
         "🔒 Sign In / Demat",
     ]
 
-# Manage tab state
-if "active_tab" not in st.session_state or st.session_state["active_tab"] not in tabs:
-    st.session_state["active_tab"] = tabs[0]
-
-default_idx = tabs.index(st.session_state["active_tab"])
+# Manage tab state cleanly with direct widget binding (Fixes 2-click issue)
+if "nav_tab" not in st.session_state or st.session_state["nav_tab"] not in tabs:
+    st.session_state["nav_tab"] = tabs[0]
 
 selected_tab = st.radio(
     "Navigation",
     tabs,
-    index=default_idx,
+    key="nav_tab",
     horizontal=True,
     label_visibility="collapsed",
 )
-st.session_state["active_tab"] = selected_tab
 
 st.divider()
 
@@ -188,7 +185,7 @@ elif selected_tab == "🔒 Sign In / Demat":
                 ok, msg, u_obj = auth_manager.authenticate_user(main_u, main_p)
                 if ok and u_obj:
                     auth_manager.login_session(u_obj)
-                    st.session_state["active_tab"] = "📊 Portfolio & Demat"
+                    st.session_state["nav_tab"] = "📊 Portfolio & Demat"
                     st.rerun()
                 else:
                     st.error(msg)
