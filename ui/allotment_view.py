@@ -89,6 +89,11 @@ def render_allotment_view():
                 <a href="{assigned_reg['url']}" target="_blank" style="display: block; text-align: center; background-color: #00e676; color: #000000; padding: 12px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 1.05rem;">
                     🚀 Open {assigned_reg['name'].split()[0]} Allotment Portal (1-Click)
                 </a>
+                <div style="text-align: center; margin-top: 8px;">
+                    <a href="{assigned_reg['url']}" target="_blank" style="color: #90caf9; font-size: 0.8rem; text-decoration: underline;">
+                        🔗 {assigned_reg['url']}
+                    </a>
+                </div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -117,7 +122,9 @@ def render_allotment_view():
         for idx, (r_key, r_info) in enumerate(all_regs.items()):
             with r_cols[idx % 3]:
                 st.markdown(
-                    f"**{r_info['name']}**<br><a href='{r_info['url']}' target='_blank'>Visit Portal ↗</a>",
+                    f"**{r_info['name']}**<br>"
+                    f"<a href='{r_info['url']}' target='_blank' style='color:#00e676; font-weight:bold;'>Open Portal ↗</a><br>"
+                    f"<small style='color:#78909c; word-break: break-all;'>{r_info['url']}</small>",
                     unsafe_allow_html=True,
                 )
 

@@ -11,14 +11,14 @@ REGISTRARS = {
     "link_intime": {
         "name": "MUFG Link Intime India Pvt Ltd",
         "url": "https://in.mpms.mufg.com/Initial_Offer/public-issues.html",
-        "alt_url": "https://linkintime.co.in/initial_offer/public-issues.html",
+        "alt_url": "https://in.mpms.mufg.com/Initial_Offer/public-issues.html",
         "supported_searches": ["PAN Number", "Application Number", "DP/Client ID", "Account No"],
         "description": "Primary registrar for large Mainboard issues (Tata, Bajaj, Hyundai, etc.).",
     },
     "kfintech": {
         "name": "KFin Technologies Ltd (KFintech)",
         "url": "https://ipostatus.kfintech.com/",
-        "alt_url": "https://ris.kfintech.com/ipostatus/",
+        "alt_url": "https://ipostatus.kfintech.com/",
         "supported_searches": ["PAN Number", "Application Number", "DP/Client ID"],
         "description": "Major registrar for top Mainboard and select SME issues.",
     },
