@@ -140,16 +140,37 @@ def render_portfolio_view():
             cols_present = [c for c in mf_display_cols.keys() if c in df_mf.columns]
             df_mf_display = df_mf[cols_present].rename(columns=mf_display_cols)
 
+            def _color_pnl(val):
+                try:
+                    num = float(val)
+                    if num > 0:
+                        return "color: #00e676; font-weight: bold;"
+                    elif num < 0:
+                        return "color: #ff5252; font-weight: bold;"
+                    return ""
+                except Exception:
+                    return ""
+
+            styler_mf = df_mf_display.style
+            pnl_subset = [c for c in ["Returns P&L (₹)", "Returns %"] if c in df_mf_display.columns]
+            if pnl_subset:
+                if hasattr(styler_mf, "map"):
+                    styler_mf = styler_mf.map(_color_pnl, subset=pnl_subset)
+                else:
+                    styler_mf = styler_mf.applymap(_color_pnl, subset=pnl_subset)
+
+            styler_mf = styler_mf.format({
+                "Units Held": "{:,.3f}",
+                "Avg NAV (₹)": "₹{:,.2f}",
+                "Current NAV (₹)": "₹{:,.2f}",
+                "Invested Amount (₹)": "₹{:,.2f}",
+                "Current Value (₹)": "₹{:,.2f}",
+                "Returns P&L (₹)": "₹{:,.2f}",
+                "Returns %": "{:+.2f}%",
+            })
+
             st.dataframe(
-                df_mf_display.style.format({
-                    "Units Held": "{:,.3f}",
-                    "Avg NAV (₹)": "₹{:,.2f}",
-                    "Current NAV (₹)": "₹{:,.2f}",
-                    "Invested Amount (₹)": "₹{:,.2f}",
-                    "Current Value (₹)": "₹{:,.2f}",
-                    "Returns P&L (₹)": "₹{:,.2f}",
-                    "Returns %": "{:+.2f}%",
-                }),
+                styler_mf,
                 use_container_width=True,
                 hide_index=True,
             )

@@ -101,7 +101,7 @@ class TestKiteMCPServer(unittest.TestCase):
                 "quantity": 100.0,
                 "average_price": 100.0,
                 "last_price": 120.0,
-                "pnl": 2000.0,
+                "pnl": 0.0,  # Zerodha returns 0; kite_service computes from valuation
                 "last_price_date": "2026-09-30",
             }
         ]

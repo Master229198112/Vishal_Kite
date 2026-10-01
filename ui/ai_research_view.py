@@ -49,15 +49,17 @@ def render_ai_research_view():
         st.write("")
         analyze_btn = st.button("✨ Run Gemini Analysis", type="primary", use_container_width=True)
 
-    if analyze_btn or "last_analyzed_ipo" in st.session_state:
-        target = selected_ipo if analyze_btn else st.session_state.get("last_analyzed_ipo")
-        active_lang = selected_lang if analyze_btn else st.session_state.get("last_analyzed_lang", "English")
-        st.session_state["last_analyzed_ipo"] = target
-        st.session_state["last_analyzed_lang"] = active_lang
+    # 2. Only execute Gemini API call when the button is explicitly clicked
+    if analyze_btn:
+        with st.spinner(f"Analyzing {selected_ipo} in {selected_lang} via Google Gemini & YouTube intelligence..."):
+            res = ipo_mcp.get_ipo_analysis_summary(selected_ipo, language=selected_lang)
+            st.session_state["active_analysis_result"] = res
+            st.session_state["active_analysis_target"] = selected_ipo
+            st.session_state["active_analysis_lang"] = selected_lang
 
-        with st.spinner(f"Analyzing {target} in {active_lang} via Google Gemini & YouTube intelligence..."):
-            res = ipo_mcp.get_ipo_analysis_summary(target, language=active_lang)
-
+    # 3. Render analysis results from session state if available
+    res = st.session_state.get("active_analysis_result")
+    if res:
         if res.get("status") == "error":
             st.error(f"Analysis failed: {res.get('message')}")
             return
@@ -82,7 +84,9 @@ def render_ai_research_view():
         st.info(f"**Verdict:** {verdict}")
 
         # AI Narrative Memo
-        st.markdown("### 📋 Executive Research Memo")
+        target_name = st.session_state.get("active_analysis_target", "")
+        target_lang = st.session_state.get("active_analysis_lang", "English")
+        st.markdown(f"### 📋 Executive Research Memo: {target_name} ({target_lang})")
         st.markdown(res.get("ai_narrative_report", "No report available."))
 
         st.divider()

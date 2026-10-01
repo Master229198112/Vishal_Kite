@@ -99,9 +99,11 @@ def fetch_mf_holdings() -> Dict[str, Any]:
         qty = float(m.get("quantity", 0.0))
         avg_price = float(m.get("average_price", 0.0))
         last_price = float(m.get("last_price", 0.0))
-        pnl = float(m.get("pnl", 0.0))
         invested = qty * avg_price
         cur_val = qty * last_price
+        # Zerodha Kite mf_holdings() returns pnl as 0; compute accurate P&L from valuation
+        raw_pnl = float(m.get("pnl", 0.0)) if m.get("pnl") is not None else 0.0
+        pnl = raw_pnl if raw_pnl != 0.0 else (cur_val - invested)
 
         total_invested += invested
         current_value += cur_val
