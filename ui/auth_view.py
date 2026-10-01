@@ -89,7 +89,11 @@ def render_auth_view():
             "Enter your password and 2FA TOTP."
         )
 
-        kite = KiteConnect(api_key=api_key or "hlfa1f02ecafpziy")
+        if not api_key:
+            st.error("KITE_API_KEY is not configured in Secrets / .env.")
+            return
+
+        kite = KiteConnect(api_key=api_key)
         login_url = kite.login_url()
 
         if st.button("🚀 Open Zerodha 2FA Login in Browser", use_container_width=True, type="primary"):
