@@ -31,6 +31,19 @@ st.set_page_config(
 # Auto-handle Zerodha OAuth redirect if returning from authorization
 auto_handle_oauth_redirect(get_config("KITE_API_KEY"), get_config("KITE_API_SECRET"))
 
+# Auto-refresh daily session headlessly on startup if secrets are stored
+if get_config("ZERODHA_TOTP_SECRET") and get_config("ZERODHA_PASSWORD"):
+    from ui.auth_view import check_auth_status
+    from totp_auth import perform_headless_kite_login
+
+    is_valid, _, _ = check_auth_status()
+    if not is_valid and not st.session_state.get("_auto_login_attempted", False):
+        st.session_state["_auto_login_attempted"] = True
+        try:
+            perform_headless_kite_login()
+        except Exception:
+            pass
+
 # 2. Sleek Dark Theme Custom Styling & Navigation Elements
 st.markdown(
     """
