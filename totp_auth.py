@@ -7,6 +7,7 @@ and automated browserless session token renewal.
 import base64
 import hashlib
 import hmac
+import re
 import struct
 import time
 from urllib.parse import parse_qs, urlparse
@@ -105,22 +106,41 @@ def perform_headless_kite_login(
                 return False, f"Step 2 (TOTP 2FA) failed: {msg}", None
 
             # 3. Retrieve Connect OAuth authorization redirect
-            connect_auth_url = f"https://kite.zerodha.com/connect/login?v=3&api_key={k_api}"
-            resp3 = client.get(connect_auth_url)
+            # Follow OAuth redirects (connect/login -> connect/finish -> redirect_url?request_token=...)
+            curr_url = f"https://kite.zerodha.com/connect/login?v=3&api_key={k_api}"
+            request_token = None
+            last_location = None
 
-            # Expected 302 Redirect containing request_token
-            location = resp3.headers.get("location") or resp3.headers.get("Location")
-            if not location:
-                return False, "Kite Connect authorization redirect was not received.", None
+            for _ in range(5):
+                resp3 = client.get(curr_url)
+                location = resp3.headers.get("location") or resp3.headers.get("Location")
 
-            parsed_url = urlparse(location)
-            params = parse_qs(parsed_url.query)
-            request_tokens = params.get("request_token")
+                if not location:
+                    # Check if request_token is in response URL or body text
+                    raw_content = f"{resp3.url} {resp3.text}"
+                    match = re.search(r"request_token=([a-zA-Z0-9]+)", raw_content)
+                    if match:
+                        request_token = match.group(1)
+                    break
 
-            if not request_tokens:
-                return False, f"Request token not found in redirect URL: {location}", None
+                last_location = location
+                if location.startswith("/"):
+                    location = f"https://kite.zerodha.com{location}"
 
-            request_token = request_tokens[0]
+                parsed_url = urlparse(location)
+                params = parse_qs(parsed_url.query)
+                if "request_token" in params:
+                    request_token = params["request_token"][0]
+                    break
+
+                if "status=error" in location:
+                    err_msg = params.get("message", ["Authorization declined"])[0]
+                    return False, f"Zerodha Connect authorization error: {err_msg}", None
+
+                curr_url = location
+
+            if not request_token:
+                return False, f"Request token not found in redirect URL: {last_location or curr_url}", None
 
             # 4. Exchange request_token for Kite daily access_token
             kite = KiteConnect(api_key=k_api)
