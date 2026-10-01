@@ -40,7 +40,7 @@ class TestNewFeatures(unittest.TestCase):
 
     def test_morning_briefing_generation(self):
         briefing = notifications.generate_morning_briefing(include_demat=False)
-        self.assertIn("Antigravity Morning", briefing)
+        self.assertIn("Vishal TradeX Morning", briefing)
         self.assertIn("Top Tracked IPOs", briefing)
 
         wa_url = notifications.get_whatsapp_share_url(briefing)

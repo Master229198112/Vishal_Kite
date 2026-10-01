@@ -1,3 +1,3 @@
 """
-UI Views Package for Antigravity Kite & IPO Dashboard
+UI Views Package for Vishal TradeX Terminal
 """

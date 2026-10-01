@@ -1,4 +1,4 @@
-# Zerodha Kite & IPO Research MCP Suite for Google Antigravity
+# Vishal TradeX — Kite & IPO Intelligence Suite
 
 A dual Model Context Protocol (MCP) server suite providing:
 1. **Zerodha Kite:** Read-only portfolio analytics, position tracking, and market monitoring.

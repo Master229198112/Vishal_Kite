@@ -1,5 +1,5 @@
 """
-Common UI components and navigation helpers for Antigravity Kite & IPO Terminal.
+Common UI components and navigation helpers for Vishal TradeX Terminal.
 """
 
 import streamlit as st

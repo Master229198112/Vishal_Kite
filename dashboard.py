@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Antigravity Kite & IPO Terminal Dashboard
+Vishal TradeX Terminal Dashboard
 Interactive full-screen analytics dashboard with role-based authentication,
 bcrypt security, live Zerodha portfolio & mutual funds, real-time GMP, and Gemini AI.
 
@@ -22,7 +22,7 @@ from ui.profile_view import render_profile_view
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="Antigravity Kite & IPO Terminal",
+    page_title="Vishal TradeX | AI & IPO Terminal",
     page_icon="📈",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -119,7 +119,7 @@ st.markdown(
 
 # 3. Sidebar: Authentication Status & Quick Controls
 with st.sidebar:
-    st.title("📈 Antigravity Terminal")
+    st.title("📈 Vishal TradeX")
     st.caption("Zerodha Kite + Mutual Funds + IPO AI Suite")
     st.divider()
 

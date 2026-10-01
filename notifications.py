@@ -19,7 +19,7 @@ def generate_morning_briefing(include_demat: bool = True) -> str:
     today_str = datetime.now().strftime("%A, %d %b %Y")
 
     lines = [
-        "🌅 *Antigravity Morning Market & IPO Briefing*",
+        "🌅 *Vishal TradeX Morning Market & IPO Briefing*",
         f"📅 *Date:* {today_str}",
         "",
     ]
